@@ -96,38 +96,23 @@ export class GameManager {
         this.spirit.y = sy;
     }
 
-    handleInput(key) {
+    setRaycaster(raycaster) {
+        this.raycaster = raycaster;
+        // Initial sync
+        this.raycaster.updateLightMap(this.gridSystem);
+
+        // Bind Callback: 3D Movement -> 2D Logic
+        this.raycaster.onPlayerMove = (dx, dy) => {
+            console.log(`3D Move Detected: ${dx}, ${dy}`);
+            // Simulate "Input" for movement
+            this.handlePlayerMove(dx, dy);
+        };
+    }
+
+    // Separated logic for movement execution
+    handlePlayerMove(dx, dy) {
         if (this.gameOver || this.isPaused) return;
-
-        // GLOBAL INPUTS (Always allowed)
-        if (key === 'Reveal') {
-            this.triggerReveal();
-            return;
-        }
-
-        // Force Reveal(Debug Only)
-        if (key === 'f' || key === 'F') {
-            this.forceReaval();
-            return;
-        }
-
-
-        // Strict Turn: Only allow input if it's PLAYER turn AND we have AP
-        if (this.turn !== 'PLAYER' || this.currentAP <= 0) return;
-
-        let dx = 0;
-        let dy = 0;
-
-        switch (key) {
-            case 'w': case 'ArrowUp': dy = -1; break;
-            case 's': case 'ArrowDown': dy = 1; break;
-            case 'a': case 'ArrowLeft': dx = -1; break;
-            case 'd': case 'ArrowRight': dx = 1; break;
-            case ' ': case 'Space': break; // Wait
-            case 'r': this.reset(); return;
-            case 'Enter': case 'Start': return;
-            default: return;
-        }
+        if (this.turn !== 'PLAYER') return;
 
         const targetX = this.player.x + dx;
         const targetY = this.player.y + dy;
@@ -151,6 +136,56 @@ export class GameManager {
 
             // 6. WAIT FOR TIMER (No Spirit Turn here)
             console.log(`Action Taken. AP: ${this.currentAP}`);
+        }
+    }
+
+    handleInput(key) {
+        if (this.gameOver || this.isPaused) return;
+
+        // GLOBAL INPUTS (Always allowed)
+        if (key === 'Reveal') {
+            this.triggerReveal();
+            return;
+        }
+
+        // Force Reveal(Debug Only)
+        if (key === 'f' || key === 'F') {
+            this.forceReaval();
+            return;
+        }
+
+        // If Raycaster is active, IGNORE WASD for 2D movement to avoid conflicts!
+        // We only allow 'r' (Reset) or maybe 'Space' (Wait)
+        if (this.raycaster) {
+            if (key === 'r') { this.reset(); return; }
+            // Allow 'Space' to skip turn?
+            if (key === ' ' || key === 'Space') {
+                // Wait implementation? 
+            }
+            return;
+        }
+
+        // ... Old 2D Input Fallback (for debugging purely 2D mode) ...
+
+        // Strict Turn: Only allow input if it's PLAYER turn AND we have AP
+        if (this.turn !== 'PLAYER' || this.currentAP <= 0) return;
+
+        let dx = 0;
+        let dy = 0;
+
+        switch (key) {
+            case 'w': case 'ArrowUp': dy = -1; break;
+            case 's': case 'ArrowDown': dy = 1; break;
+            case 'a': case 'ArrowLeft': dx = -1; break;
+            case 'd': case 'ArrowRight': dx = 1; break;
+            case ' ': case 'Space': break; // Wait
+            case 'r': this.reset(); return;
+            case 'Enter': case 'Start': return;
+            default: return;
+        }
+
+        if (dx !== 0 || dy !== 0) {
+            this.handlePlayerMove(dx, dy);
         }
     }
 
@@ -298,11 +333,23 @@ export class GameManager {
         this.uiManager.updateAmbience(isSafe);
     }
 
-    draw() {
-        this.updateEnvironment(); // Check environment every frame or update? 
-        // Better to put it in update/loop, but draw is called in loop.
-        // Putting it here ensures visual sync.
 
-        this.renderer.draw(this.gridSystem, this.player, this.spirit, this.timeLeft);
+
+    draw() {
+        this.updateEnvironment();
+
+        // Sync 3D Environment
+        if (this.raycaster) {
+            this.raycaster.updateLightMap(this.gridSystem);
+        }
+
+        let rotation = 0;
+        if (this.raycaster && this.raycaster.player) {
+            // Calculate angle from DirX, DirY
+            // Invert X because 3D view is mirrored
+            rotation = Math.atan2(this.raycaster.player.dirY, -this.raycaster.player.dirX);
+        }
+
+        this.renderer.draw(this.gridSystem, this.player, this.spirit, this.timeLeft, rotation);
     }
 }

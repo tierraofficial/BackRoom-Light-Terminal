@@ -34,7 +34,7 @@ export const GAME_SETTINGS = {
     TRAP_THRESHOLD: 5,            // 困兽阈值 (如果连通暗区小于此值，视为被困，触发破坏)
 
     // 回合设置
-    TURN_TIME_LIMIT: 2000,        // 回合限时 (毫秒)
+    TURN_TIME_LIMIT: 3000,        // 回合限时 (毫秒)
 
     // 关卡生成
     LIGHT_CHANCE: 0.5,            // 初始亮灯概率

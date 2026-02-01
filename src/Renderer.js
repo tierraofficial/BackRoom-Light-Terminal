@@ -15,7 +15,14 @@ export class Renderer {
      * @param {Player} player 
      * @param {Spirit} spirit 
      */
-    draw(gridSystem, player, spirit, timeLeft) {
+    draw(gridSystem, player, spirit, timeLeft, rotationAngle) {
+        // ... (Background and Timer Bar code remains same) ...
+
+        // ... (Fade States code remains same) ...
+
+        // ... (LCD Grid Cells code remains same) ...
+
+
         // Clear background
         this.ctx.fillStyle = COLORS.BG;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -59,7 +66,8 @@ export class Renderer {
             for (let y = 0; y < GRID_SIZE; y++) {
                 const fadeVal = this.fadeStates[x][y]; // 0 to 1
 
-                const posX = x * TILE_SIZE;
+                // Mirror Rendering (Flip X) to match 3D View
+                const posX = (GRID_SIZE - 1 - x) * TILE_SIZE;
                 const posY = y * TILE_SIZE;
                 const size = TILE_SIZE; // Leave a small gap for LCD grid effect
 
@@ -85,26 +93,49 @@ export class Renderer {
             }
         }
 
-        // Draw Player (High Contrast Hollow Box)
+        // Draw Player (Pulse Compass Triangle)
         if (player) {
             this.ctx.save();
+            // Mirror X Position
+            const cx = (GRID_SIZE - 1 - player.x) * TILE_SIZE + TILE_SIZE / 2;
+            const cy = player.y * TILE_SIZE + TILE_SIZE / 2;
 
-            const pSize = TILE_SIZE - 8;
-            const pOff = 4;
-
-            // Blink Effect (Faster: 300ms)
-            if (Math.floor(Date.now() / 300) % 2 === 0) {
-                // Outer Black Stroke (Contrast)
-                this.ctx.strokeStyle = '#000000';
-                this.ctx.lineWidth = 6;
-                this.ctx.strokeRect(player.x * TILE_SIZE + pOff, player.y * TILE_SIZE + pOff, pSize, pSize);
-
-                // Inner Color Stroke
-                this.ctx.strokeStyle = COLORS.PLAYER;
-                this.ctx.lineWidth = 3;
-                this.ctx.shadowBlur = 0; // Keep it crisp
-                this.ctx.strokeRect(player.x * TILE_SIZE + pOff, player.y * TILE_SIZE + pOff, pSize, pSize);
+            // Move to center and rotate
+            this.ctx.translate(cx, cy);
+            if (rotationAngle !== undefined) {
+                this.ctx.rotate(rotationAngle);
             }
+
+            // Pulse Scale
+            const pulse = 1.0 + Math.sin(Date.now() / 200) * 0.1;
+            this.ctx.scale(pulse, pulse);
+
+            // Draw Rounded Triangle
+            const size = TILE_SIZE * 0.4;
+            this.ctx.fillStyle = '#fffacd'; // Pale Yellow
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = 'rgba(255, 250, 205, 0.5)';
+
+            this.ctx.beginPath();
+            // Triangle pointing UP (since 3D Forward is -Y, and canvas 0 is Right, we need to adjust)
+            this.ctx.moveTo(size, 0); // Tip
+            this.ctx.lineTo(-size * 0.7, -size * 0.7);
+            this.ctx.quadraticCurveTo(-size * 0.5, 0, -size * 0.7, size * 0.7);
+            this.ctx.closePath();
+
+            // Style: Rounder, Thicker, Retro Grey
+            this.ctx.lineJoin = 'round';
+            this.ctx.lineWidth = 5;
+            this.ctx.strokeStyle = '#606060'; // Dark Grey (softer than black, but visible)
+            this.ctx.stroke();
+
+            this.ctx.fill(); // Fill AFTER stroke to keep the inner shape crisp? 
+            // Standard is Stroke after Fill to overlay. 
+            // If we want rounded corners, Stroke must be the outer edge.
+            // Let's do Fill then Stroke, but with round join.
+            // Wait, if I fill then stroke, the stroke covers half the fill edge.
+            // That's fine.
+
             this.ctx.restore();
         }
 
@@ -122,7 +153,8 @@ export class Renderer {
             this.ctx.shadowBlur = 10;
             this.ctx.shadowColor = 'rgba(255, 68, 68, 0.6)';
 
-            const sX = spirit.x * TILE_SIZE + TILE_SIZE / 2;
+            // Mirror X
+            const sX = (GRID_SIZE - 1 - spirit.x) * TILE_SIZE + TILE_SIZE / 2;
             const sY = spirit.y * TILE_SIZE + TILE_SIZE / 2;
 
             // Draw Circle
