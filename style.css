@@ -615,11 +615,11 @@ canvas#gameCanvas {
     background: transparent;
     /* No overlay */
     padding: 0;
-    color: #2a1a10;
-    /* Dark Brown Ink Color */
+    color: #000000 !important;
+    /* Force Black */
     font-family: 'Courier New', Courier, serif;
     /* Typewriter/Paper feel */
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    text-shadow: none;
     border: none;
     backdrop-filter: none;
     text-align: center;
