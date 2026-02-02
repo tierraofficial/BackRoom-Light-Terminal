@@ -266,16 +266,7 @@ export class GameManager {
     resolveTurn() {
         console.log("Turn Time Up. Resolving...");
 
-        // 1. Check Idle Penalty (Did player use AP?)
-        if (this.currentAP === GAME_SETTINGS.PLAYER_AP) {
-            console.log("IDLE PENALTY TRIGGERED!");
-            for (let i = 0; i < GAME_SETTINGS.IDLE_PENALTY_LIGHTS; i++) {
-                this.gridSystem.corruptRandomLight();
-            }
-            if (this.checkGameState()) return;
-        }
-
-        // 2. Spirit Act
+        // 1. Spirit Act (Priority: Spirit moves first)
         this.turn = 'SPIRIT';
 
         const result = this.spirit.act(this.player, this.gridSystem);
@@ -285,10 +276,12 @@ export class GameManager {
 
         // Spirit Special Actions
         if (result && result.action === 'STUCK') {
-            this.gridSystem.corruptRandomLight();
+            const target = this.gridSystem.corruptRandomLight();
+            if (target && this.renderer) this.renderer.triggerWarning(target.x, target.y);
         }
         else if (result && result.action === 'CORRUPT') {
             this.gridSystem.corruptLightAt(result.target.x, result.target.y);
+            if (this.renderer) this.renderer.triggerWarning(result.target.x, result.target.y);
         }
 
         // Check Environment
@@ -308,6 +301,16 @@ export class GameManager {
 
         // Check Void
         if (this.checkGameState()) return;
+
+        // 2. Idle Penalty (Check AP usage AFTER spirit move)
+        // This ensures the spirit doesn't get a 'free kill' on a tile that JUST went dark
+        if (this.currentAP === GAME_SETTINGS.PLAYER_AP) {
+            console.log("IDLE PENALTY TRIGGERED!");
+            for (let i = 0; i < GAME_SETTINGS.IDLE_PENALTY_LIGHTS; i++) {
+                this.gridSystem.corruptRandomLight();
+            }
+            if (this.checkGameState()) return;
+        }
 
         // 3. Start Next Turn
         this.startNextTurn();

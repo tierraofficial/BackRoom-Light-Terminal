@@ -8,6 +8,15 @@ export class Renderer {
         // Animation States: 2D array storing opacity/fade value (0.0 to 1.0)
         // 0.0 = Fully OFF color, 1.0 = Fully ON color
         this.fadeStates = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+
+        // Warning States: 2D array for Red Flash (0.0 to 1.0)
+        this.warningStates = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+    }
+
+    triggerWarning(x, y) {
+        if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+            this.warningStates[x][y] = 1.0;
+        }
     }
 
     /**
@@ -19,7 +28,6 @@ export class Renderer {
         // ... (Background and Timer Bar code remains same) ...
 
         // ... (Fade States code remains same) ...
-
         // ... (LCD Grid Cells code remains same) ...
 
 
@@ -41,20 +49,22 @@ export class Renderer {
         const gridW = GRID_SIZE * TILE_SIZE;
         const gridH = GRID_SIZE * TILE_SIZE;
 
-        // Update Fade States
+        // Update Fade States & Warning States
         for (let x = 0; x < GRID_SIZE; x++) {
             for (let y = 0; y < GRID_SIZE; y++) {
+                // 1. Regular Light State
                 const target = gridSystem.isSafe(x, y) ? 1.0 : 0.0;
                 let current = this.fadeStates[x][y];
-
-                // Ease-Out Interpolation (LCD Ghosting feel)
                 const diff = target - current;
-                if (Math.abs(diff) < 0.01) {
-                    current = target;
-                } else {
-                    current += diff * ANIMATION_SPEED; // Ease factor
-                }
+                if (Math.abs(diff) < 0.01) current = target;
+                else current += diff * ANIMATION_SPEED;
                 this.fadeStates[x][y] = current;
+
+                // 2. Warning State (Decay)
+                if (this.warningStates[x][y] > 0) {
+                    this.warningStates[x][y] -= 0.05; // Decay Speed
+                    if (this.warningStates[x][y] < 0) this.warningStates[x][y] = 0;
+                }
             }
         }
 
@@ -65,6 +75,7 @@ export class Renderer {
         for (let x = 0; x < GRID_SIZE; x++) {
             for (let y = 0; y < GRID_SIZE; y++) {
                 const fadeVal = this.fadeStates[x][y]; // 0 to 1
+                const warnVal = this.warningStates[x][y]; // 0 to 1
 
                 // Mirror Rendering (Flip X) to match 3D View
                 const posX = (GRID_SIZE - 1 - x) * TILE_SIZE;
@@ -75,16 +86,28 @@ export class Renderer {
                 this.ctx.fillStyle = COLORS.OFF;
                 this.ctx.fillRect(posX + 1, posY + 1, size - 2, size - 2);
 
-                // "ON" pixel overlay (Lit with Warm Glow)
-                if (fadeVal > 0.01) {
-                    this.ctx.save();
-                    this.ctx.globalAlpha = fadeVal;
-                    this.ctx.fillStyle = COLORS.ON;
+                // "ON" pixel overlay (Lit with Warm Glow) OR "WARNING" (Red)
+                // We combine them. If Warning is high, it overrides.
 
-                    // Soft Warm Bloom
-                    if (fadeVal > 0.3) {
-                        this.ctx.shadowBlur = 20;
-                        this.ctx.shadowColor = 'rgba(253, 253, 202, 0.4)'; // Warm glow
+                if (fadeVal > 0.01 || warnVal > 0.01) {
+                    this.ctx.save();
+
+                    // Determine Color
+                    if (warnVal > 0.1) {
+                        // Red Flash
+                        this.ctx.globalAlpha = warnVal;
+                        this.ctx.fillStyle = '#ff0000';
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = '#ff4444';
+                    } else {
+                        // Regular Light
+                        this.ctx.globalAlpha = fadeVal;
+                        this.ctx.fillStyle = COLORS.ON;
+
+                        if (fadeVal > 0.3) {
+                            this.ctx.shadowBlur = 20;
+                            this.ctx.shadowColor = 'rgba(253, 253, 202, 0.4)';
+                        }
                     }
 
                     this.ctx.fillRect(posX + 1, posY + 1, size - 2, size - 2);
