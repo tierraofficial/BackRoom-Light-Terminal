@@ -1,0 +1,72 @@
+/* --- Mobile Landscape Hint --- */
+#landscape-hint {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    color: #ffd700;
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#landscape-hint h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #ff4444;
+}
+
+#landscape-hint p {
+    font-size: 1.2rem;
+    color: #888;
+}
+
+@media screen and (orientation: portrait) and (max-width: 900px) {
+    #landscape-hint {
+        display: flex !important;
+    }
+}
+
+/* --- Mobile Fullscreen Overrides --- */
+@media screen and (max-width: 1024px) {
+
+    /* Force game frame to fill screen on mobile/tablets */
+    .app-container {
+        width: 100vw !important;
+        height: 100vh !important;
+        padding: 0 !important;
+        background: #000 !important;
+    }
+
+    #game-frame {
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .screen-content {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    #raycaster-canvas {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    /* Adjust UI Overlay positions */
+    #raycaster-ui {
+        top: 10px;
+        left: 10px;
+    }
+}

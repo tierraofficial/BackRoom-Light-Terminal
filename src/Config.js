@@ -16,7 +16,7 @@ export const RENDER_3D_SETTINGS = {
     // 修改这些值可以调整场景的亮暗对比
     MIN_BRIGHTNESS: 0.3,    // 最暗亮度 (0.0 - 1.0), 即使完全黑暗时的最低可见度
     BRIGHT_FOG_DIST: 15.0,  // 明亮房间的视野距离/雾效起始距离 (越大看得越远)
-    DARK_FOG_DIST: 4.0      // 黑暗房间的视野距离 (越小越压抑，视野越窄)
+    DARK_FOG_DIST: 3.0      // 黑暗房间的视野距离 (越小越压抑，视野越窄)
 };
 
 export const COLORS_3D = {
@@ -40,7 +40,8 @@ export const COLORS = {
     PLAYER: '#fffacd',    // 玩家光标 (亮柠檬黄)
     SPIRIT: '#ff4444',    // 恶灵 (复古红)
     HIGHLIGHT: 'rgba(255, 255, 200, 0.1)', // 鼠标悬停/交互高亮
-    CORRUPT: '#ff0000'    // 破坏/腐蚀特效
+    CORRUPT: '#810c0cff',   // 破坏/腐蚀特效
+    TUTORIAL_TEXT: '#000000' // 教程文字颜色
 };
 
 // -----------------------------------------------------
@@ -59,11 +60,11 @@ export const GAME_SETTINGS = {
     PLAYER_START: { x: 2, y: 2 }, // 玩家出生点 (中心)
 
     // 恶灵设置
-    SPIRIT_HP: 3,                 // 恶灵生命值 (被光照几次后驱逐)
+    SPIRIT_HP: 100,                 // 恶灵生命值 (被光照几次后驱逐)
     TRAP_THRESHOLD: 5,            // 困兽阈值 (如果连通暗区小于此值，视为被困，触发破坏)
 
     // 回合设置
-    TURN_TIME_LIMIT: 3000,        // 回合限时 (毫秒)
+    TURN_TIME_LIMIT: 4000,        // 回合限时 (毫秒)
 
     // 控制设置
     MOUSE_SENSITIVITY: 0.001,     // 鼠标灵敏度 (原 0.002)
@@ -77,9 +78,9 @@ export const GAME_SETTINGS = {
     PLAYER_AP: 1,                 // 玩家每回合行动点数
 
     // 显形技能
-    SPIRIT_REVEAL_LIMIT: 3,       // 每局使用次数限制
-    SPIRIT_REVEAL_DURATION: 500,  // 显形持续时间 (毫秒)
+    SPIRIT_REVEAL_LIMIT: 4,       // 每局使用次数限制
+    SPIRIT_REVEAL_DURATION: 600,  // 显形持续时间 (毫秒)
 
     // 惩罚设置
-    IDLE_PENALTY_LIGHTS: 3        // 待机惩罚熄灭灯及数量
+    IDLE_PENALTY_LIGHTS: 2        // 待机惩罚熄灭灯及数量
 };

@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+    --case-color: #dcd085;
+    /* Less saturated, more matte yellow */
+    --case-shadow-light: #eee5aa;
+    --case-shadow-dark: #b0a660;
+
+    --screen-bezel: #222;
+    --screen-bg: #151515;
+
+    --btn-action: #c95555;
+    /* Duller red */
+    --btn-dpad: #333;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'VT323', monospace;
+    user-select: none;
+    overflow: hidden;
+    background-color: #222;
+}

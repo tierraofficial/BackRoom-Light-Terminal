@@ -1,3 +1,5 @@
+import { COLORS } from './Config.js';
+
 /**
  * ScreenManager - 管理游戏的五个界面层
  * 界面流程: Start → Tutorial → Game → GameOverVideo → GameOverStats
@@ -108,6 +110,12 @@ export class ScreenManager {
         this._hideAllScreens();
         if (this.tutorialScreenEl) {
             this.tutorialScreenEl.classList.add('active');
+
+            // Apply Dynamic Color from Config
+            const overlay = this.tutorialScreenEl.querySelector('.tutorial-content-overlay');
+            if (overlay) {
+                overlay.style.color = COLORS.TUTORIAL_TEXT;
+            }
         }
         this.currentScreen = 'tutorial';
         console.log("Screen: TUTORIAL");
